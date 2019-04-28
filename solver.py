@@ -9,9 +9,11 @@ class Solver:
         if not self.solvable(input_list):
             raise ValueError('A solution is not possible')
 
-        # https://docs.python.org/2/library/copy.html
+        # List to grid -> 1,2,3,4 ---> [[1,2], [3,4]]
         self.initial_state = copy.deepcopy(self.list_to_grid(input_list))
+        self.n = int(math.sqrt(len(input_list)))
         self.goal_state = self.set_goal_state(input_list)
+        self.a_star_algorithm()
 
         # # using custom structures so we can implement a custom __contains__()
         # self.frontier = custom_structures.Frontier() 
@@ -95,3 +97,21 @@ class Solver:
                 i += 1
 
         return input_grid
+
+    def set_goal_state(self, input_list):
+        """Construct and return a grid state in the correct order."""
+
+        cnt = 1
+        goal_state = []
+        for i in range(self.n):
+            row = list()
+            for j in range(self.n):
+                row.append(cnt)
+                cnt += 1
+            goal_state.append(row)
+        goal_state[self.n-1][self.n-1] = 0
+        return goal_state
+
+    def a_star_algorithm(self):
+        grid_obj = grid.Grid(self.initial_state)
+        grid_obj.manhattan_score(self.goal_state)
