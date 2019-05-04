@@ -61,3 +61,11 @@ class Grid:
         self.state[space[0] + y][space[1] + x] = 0
 
         return True
+
+    def visualize(self):
+        print("\n", "-"*((self.n*2)**2//2))
+        for y, row in enumerate(self.state):
+            for x, value in enumerate(row):
+                print(" {:3d} |".format(value), end="")
+            print("\n", "-"*((self.n*2)**2//2))
+

@@ -1,5 +1,6 @@
 import sys
 import solver
+import grid
 
 
 def initialize():
@@ -22,10 +23,23 @@ def initialize():
 
     try:
         solver_obj = solver.Solver(input_list)
+        return solver_obj
     except ValueError:
         print('no solution exists')
         sys.exit()
 
 
+def visualize(solver):
+    solved_grid = grid.Grid(solver.initial_state)
+    solved_grid.visualize()
+
+    for move in solver.path:
+        print("       ||\n"*2,  "      \\/")
+        solved_grid.move(move)
+        solved_grid.visualize()
+
+
 if __name__ == "__main__":
-    initialize()
+    print("Bismillah")
+    solver_obj = initialize()
+    visualize(solver_obj)

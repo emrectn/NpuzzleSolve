@@ -19,7 +19,7 @@ class Solver:
         self.ast_frontier = custom_structures.Priority_Frontier()
         self.explored = custom_structures.Explored()
         self.frontier = custom_structures.Frontier()
-        self.a_star_algorithm()
+        self.path = self.a_star_algorithm()
 
     def solvable(self, input_list):
         """
@@ -113,17 +113,11 @@ class Solver:
         initial_grid = grid.Grid(self.initial_state)
         initial_grid.score = initial_grid.manhattan_score(self.goal_state)
 
-        temp = grid.Grid(self.initial_state)
-        temp.score = temp.manhattan_score(self.goal_state)
-        self.ast_frontier.queue.put((5, 1, initial_grid))
-        self.ast_frontier.queue.put((5, 2, initial_grid))
-        self.ast_frontier.queue.put((4, 2, initial_grid))
-        self.ast_frontier.queue.put((4, 1, initial_grid))
+        self.ast_frontier.queue.put(
+            (initial_grid.score, self.ast_frontier.counter, initial_grid))
 
-        print("Score : ", int(temp.score))
-        self.ast_frontier.queue.put((5, 3, temp))
-        
-        print("Debug 1: ", self.ast_frontier.queue.queue)
+        self.ast_frontier.counter += 1
+
         while not self.ast_frontier.queue.empty():
             lowest_scored = self.ast_frontier.queue.get()
             state = lowest_scored[2]
@@ -132,20 +126,31 @@ class Solver:
             if self.check_goal_state(state):
                 return state.path_history
 
-        self.expand_nodes(state)
+            self.expand_nodes(state)
         raise ValueError('Shouldn\'t have got to here - gone tits')
 
     def expand_nodes(self, starting_grid):
         movement = ['UP', 'DOWN', 'LEFT', 'RIGHT']
 
         for move in movement:
-            print(move)
+            new_grid = grid.Grid(starting_grid.state)
+            new_grid.path_history = copy.copy(starting_grid.path_history)
+
+            if new_grid.move(move):
+                new_grid.path_history.append(move)
+                if new_grid not in self.frontier and new_grid not in self.explored:
+                    new_grid.score = new_grid.manhattan_score(self.goal_state)
+                    self.ast_frontier.queue.put((new_grid.score, self.ast_frontier.counter, new_grid))
+                    self.ast_frontier.counter += 1
+
+                # print(move)
 
     def check_goal_state(self, state):
         """Hedef state olup olmadıgı kontrol edilir."""
-        print("Hedef : ", self.goal_state)
-        print("Mevcut : ", state.state)
+        # print("Hedef : ", self.goal_state)
+        # print("Mevcut : ", state.state)
         if state.state == self.goal_state:
+            print("Goal Found : ", state.state)
             return True
         else:
             return False
