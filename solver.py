@@ -1,6 +1,7 @@
 import grid
 import copy
 import math
+import custom_structures
 
 
 class Solver:
@@ -13,16 +14,12 @@ class Solver:
         self.initial_state = copy.deepcopy(self.list_to_grid(input_list))
         self.n = int(math.sqrt(len(input_list)))
         self.goal_state = self.set_goal_state(input_list)
+
+        # Kuyruk yapıları için custom_structures sınıfı kullanıldı.
+        self.ast_frontier = custom_structures.Priority_Frontier()
+        self.explored = custom_structures.Explored()
+        self.frontier = custom_structures.Frontier()
         self.a_star_algorithm()
-
-        # # using custom structures so we can implement a custom __contains__()
-        # self.frontier = custom_structures.Frontier() 
-        # self.ast_frontier = custom_structures.Priority_Frontier()       
-        # self.explored = custom_structures.Explored()
-
-        # # TODO: fringe metrics not working for ast (because we're passing it wrong frontier here)
-        # self.metrics = metric.Metric(self.frontier)
-        return None
 
     def solvable(self, input_list):
         """
@@ -56,7 +53,7 @@ class Solver:
         for index, value in enumerate(input_list):
             for value_to_compare in input_list[index + 1:list_length]:
                 if value > value_to_compare:
-                    inversion_count += 1                    
+                    inversion_count += 1
 
         if inversion_count % 2 == 0:
             inversions_even = True
@@ -113,5 +110,42 @@ class Solver:
         return goal_state
 
     def a_star_algorithm(self):
-        grid_obj = grid.Grid(self.initial_state)
-        grid_obj.manhattan_score(self.goal_state)
+        initial_grid = grid.Grid(self.initial_state)
+        initial_grid.score = initial_grid.manhattan_score(self.goal_state)
+
+        temp = grid.Grid(self.initial_state)
+        temp.score = temp.manhattan_score(self.goal_state)
+        self.ast_frontier.queue.put((5, 1, initial_grid))
+        self.ast_frontier.queue.put((5, 2, initial_grid))
+        self.ast_frontier.queue.put((4, 2, initial_grid))
+        self.ast_frontier.queue.put((4, 1, initial_grid))
+
+        print("Score : ", int(temp.score))
+        self.ast_frontier.queue.put((5, 3, temp))
+        
+        print("Debug 1: ", self.ast_frontier.queue.queue)
+        while not self.ast_frontier.queue.empty():
+            lowest_scored = self.ast_frontier.queue.get()
+            state = lowest_scored[2]
+
+            self.explored.set.add(state)
+            if self.check_goal_state(state):
+                return state.path_history
+
+        self.expand_nodes(state)
+        raise ValueError('Shouldn\'t have got to here - gone tits')
+
+    def expand_nodes(self, starting_grid):
+        movement = ['UP', 'DOWN', 'LEFT', 'RIGHT']
+
+        for move in movement:
+            print(move)
+
+    def check_goal_state(self, state):
+        """Hedef state olup olmadıgı kontrol edilir."""
+        print("Hedef : ", self.goal_state)
+        print("Mevcut : ", state.state)
+        if state.state == self.goal_state:
+            return True
+        else:
+            return False

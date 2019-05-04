@@ -1,4 +1,3 @@
-import math
 import copy
 
 
@@ -26,12 +25,39 @@ class Grid:
 
         for y, row in enumerate(self.state):
             for x, value in enumerate(row):
-                if value == 0:
-                    continue
-                sum += self.manhattan_distance(value, (y, x), goal_state)
+                if value != 0:
+                    sum += self.manhattan_distance(value, (y, x), goal_state)
         return sum
 
     def manhattan_distance(self, value, coordinates, goal_state):
         goal_coordinates = self.locate_tile(value, goal_state)
-        return (abs(goal_coordinates[0] - coordinates[0]) 
+        return (abs(goal_coordinates[0] - coordinates[0])
                 + abs(goal_coordinates[1] - coordinates[1]))
+
+    def move(self, direction):
+        space = self.locate_tile(0, self.state)
+
+        if direction == 'UP':
+            y, x = -1, 0
+        elif direction == 'DOWN':
+            y, x = 1, 0
+        elif direction == 'RIGHT':
+            y, x = 0, 1
+        elif direction == 'LEFT':
+            y, x = 0, -1
+        else:
+            raise ValueError('Invalid direction: must be \'UP\', \'DOWN\', \
+                \'LEFT\' or \'RIGHT\'')  # TODO: is this good design?
+
+            # return false if move not possible
+        if space[0] + y not in range(0, self.n):
+            return False
+        if space[1] + x not in range(0, self.n):
+            return False
+
+        # swap tiles
+        tile_to_move = self.state[space[0] + y][space[1] + x]
+        self.state[space[0]][space[1]] = tile_to_move
+        self.state[space[0] + y][space[1] + x] = 0
+
+        return True

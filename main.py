@@ -1,5 +1,4 @@
-import sys 
-import grid
+import sys
 import solver
 
 
