@@ -1,5 +1,5 @@
 import sys
-import grid
+import matris
 import time
 import solver
 from tkinter import Tk, Frame, TOP, Button
@@ -35,17 +35,17 @@ def initialize():
 
 
 def visualize(solver):
-    solved_grid = grid.Grid(solver.initial_state)
-    solved_grid.visualize()
+    solved_matris = matris.Matris(solver.initial_state)
+    solved_matris.visualize()
 
     for move in solver.path:
         print("       ||\n"*2,  "      \\/")
-        solved_grid.move(move)
-        solved_grid.visualize()
+        solved_matris.move(move)
+        solved_matris.visualize()
 
 
 def visualize_tkinter(solver):
-    solver_grid = grid.Grid(solver.initial_state)
+    solver_grid = matris.Matris(solver.initial_state)
     size = solver_grid.n
 
     # Arayüz oluşturulması
@@ -75,7 +75,7 @@ def visualize_tkinter(solver):
     # Hareketlerin ekrana arayüzle gösterilmesi - time.sleep(0.4)
     for move in solver.path:
         window.update()
-        time.sleep(0.4)
+        time.sleep(0.1)
 
         unused, tile_xy, space_xy = solver_grid.move(move)
         Button(btn_frame, text=tile_xy[2], fg="black", width=10, height=3, bd=0,
@@ -91,4 +91,5 @@ def visualize_tkinter(solver):
 if __name__ == "__main__":
     solution_obj = initialize()
     # visualize(solution_obj)
+    print(len(solution_obj.path))
     visualize_tkinter(solution_obj)

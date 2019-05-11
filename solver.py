@@ -1,4 +1,4 @@
-import grid
+import matris
 import copy
 import math
 import structures
@@ -18,7 +18,6 @@ class Solver:
         # Kuyruk yapıları için structures sınıfı kullanıldı.
         self.ast_frontier = structures.Priority_Frontier()
         self.explored = structures.Explored()
-        self.frontier = structures.Frontier()
         self.path = self.a_star_algorithm()
 
     def solvable(self, input_list):
@@ -34,10 +33,10 @@ class Solver:
         size = int(math.sqrt(len(input_list)))
 
         # Boşluğun olduğu satır tek mi çift mi ?
-        temp_grid = grid.Grid(self.list_to_grid(input_list))
+        temp_matris = matris.Matris(self.list_to_grid(input_list))
 
         # Boşluğun lokasyonuna bağlı çözüm uygunluğu kontrolu
-        space_location = temp_grid.locate_tile(0, temp_grid.state)
+        space_location = temp_matris.locate_tile(0, temp_matris.state)
         if space_location[0] % 2 == 0:
             y_is_even = True
         else:
@@ -74,16 +73,13 @@ class Solver:
                 or (size_even and (space_odd == inversions_even)))
 
     def list_to_grid(self, tile_list):
-        """Take a list of length n^2, return a nxn 2D list"""
-
-        # TODO: Shouldn't this be a method of grid instead?
+        """liste alır n^2, return nxn 2D list"""
 
         n = int(math.sqrt(len(tile_list)))
 
-        # initialise empty grid
+        # [['-','-'], ['-','-'], ['-','-']]
         input_grid = [['-' for x in range(n)] for y in range(n)]
 
-        # populate grid with tiles
         i = 0
         j = 0
         for tile in tile_list:
@@ -96,7 +92,7 @@ class Solver:
         return input_grid
 
     def set_goal_state(self, input_list):
-        """Construct and return a grid state in the correct order."""
+        """Hedef matris olusturulur"""
 
         cnt = 1
         goal_state = []
@@ -110,40 +106,51 @@ class Solver:
         return goal_state
 
     def a_star_algorithm(self):
-        initial_grid = grid.Grid(self.initial_state)
+
+        # Baslangıç matrisi ve skoru
+        initial_grid = matris.Matris(self.initial_state)
         initial_grid.score = initial_grid.manhattan_score(self.goal_state)
 
+        # Kuyruga eklenir
         self.ast_frontier.queue.put(
             (initial_grid.score, self.ast_frontier.counter, initial_grid))
 
         self.ast_frontier.counter += 1
 
+        # Kuyruk bitene kadar veya hedefe ulasana kadar dongu devam eder
         while not self.ast_frontier.queue.empty():
             lowest_scored = self.ast_frontier.queue.get()
             state = lowest_scored[2]
 
             self.explored.set.add(state)
+            # Hedef ulaşılırsa gidilen path return edilir
             if self.check_goal_state(state):
                 return state.path_history
 
-            self.expand_nodes(state)
-        raise ValueError('Shouldn\'t have got to here - gone tits')
+            self.find_nodes(state)
+        raise ValueError('Opps!! Buraya gelmemeliydin.')
 
-    def expand_nodes(self, starting_grid):
+    def find_nodes(self, starting_grid):
+        """ Mevcut durumun yapabilecegi hareketlerin kuyruga eklenmesi """
         movement = ['UP', 'DOWN', 'LEFT', 'RIGHT']
 
         for move in movement:
-            new_grid = grid.Grid(starting_grid.state)
+
+            # Yeni bir matris olusturuyoruz, ana durumun kopyası
+            new_grid = matris.Matris(starting_grid.state)
             new_grid.path_history = copy.copy(starting_grid.path_history)
 
+            # Eger hareket etme imkanı varsa yeni hareketi kuyruga ekliyoruz
             if new_grid.move(move):
                 new_grid.path_history.append(move)
-                if new_grid not in self.frontier and new_grid not in self.explored:
-                    new_grid.score = new_grid.manhattan_score(self.goal_state)
-                    self.ast_frontier.queue.put((new_grid.score, self.ast_frontier.counter, new_grid))
-                    self.ast_frontier.counter += 1
 
-                # print(move)
+                # Yeni durumun daha kontrol edilmemiş eklenmemiş
+                # Sonraki adımlarda 
+                if new_grid not in self.ast_frontier and new_grid not in self.explored:
+                    new_grid.score = new_grid.manhattan_score(self.goal_state)
+                    self.ast_frontier.queue.put(
+                        (new_grid.score, self.ast_frontier.counter, new_grid))
+                    self.ast_frontier.counter += 1
 
     def check_goal_state(self, state):
         """Hedef state olup olmadıgı kontrol edilir."""

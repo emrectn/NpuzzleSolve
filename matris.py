@@ -1,7 +1,7 @@
 import copy
 
 
-class Grid:
+class Matris:
 
     def __init__(self, input_state):
         self.state = copy.deepcopy(input_state)
@@ -20,20 +20,24 @@ class Grid:
                 if value == tile:
                     return (y, x)
 
+    # matrisin bulundugu durumdaki skorunu belirler
     def manhattan_score(self, goal_state):
         sum = 0
 
+        # Her kareyi kontrol ederek distanceları toplar
         for y, row in enumerate(self.state):
             for x, value in enumerate(row):
                 if value != 0:
                     sum += self.manhattan_distance(value, (y, x), goal_state)
         return sum
 
+    # Secili karenin o anki durumu ile olması gereken durumu arasındaki fark
     def manhattan_distance(self, value, coordinates, goal_state):
         goal_coordinates = self.locate_tile(value, goal_state)
         return (abs(goal_coordinates[0] - coordinates[0])
                 + abs(goal_coordinates[1] - coordinates[1]))
 
+    # Hareket boş karenin hareket edilmesi
     def move(self, direction):
         space = self.locate_tile(0, self.state)
 
@@ -46,22 +50,23 @@ class Grid:
         elif direction == 'LEFT':
             y, x = 0, -1
         else:
-            raise ValueError('Invalid direction: must be \'UP\', \'DOWN\', \
-                \'LEFT\' or \'RIGHT\'')  # TODO: is this good design?
+            raise ValueError('Gecersiz Yon: Seçenekler \'UP\', \'DOWN\', \
+                \'LEFT\' or \'RIGHT\'')
 
-            # return false if move not possible
+            # Hareket matris sınırlarını aşarsa False döner
         if space[0] + y not in range(0, self.n):
             return False
         if space[1] + x not in range(0, self.n):
             return False
 
-        # swap tiles
+        # Karelerin değiştirilmesi
         tile_to_move = self.state[space[0] + y][space[1] + x]
         self.state[space[0]][space[1]] = tile_to_move
         self.state[space[0] + y][space[1] + x] = 0
 
         return True, (space[0], space[1], tile_to_move), (space[0]+y, space[1]+x, "")
 
+    # Debug edilmesi için matrisin adım adım console yazdırılması
     def visualize(self):
         print("\n", "-"*((self.n*2)**2//2))
         for y, row in enumerate(self.state):
