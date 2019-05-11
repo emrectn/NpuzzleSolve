@@ -1,7 +1,7 @@
 import grid
 import copy
 import math
-import custom_structures
+import structures
 
 
 class Solver:
@@ -15,10 +15,10 @@ class Solver:
         self.n = int(math.sqrt(len(input_list)))
         self.goal_state = self.set_goal_state(input_list)
 
-        # Kuyruk yapıları için custom_structures sınıfı kullanıldı.
-        self.ast_frontier = custom_structures.Priority_Frontier()
-        self.explored = custom_structures.Explored()
-        self.frontier = custom_structures.Frontier()
+        # Kuyruk yapıları için structures sınıfı kullanıldı.
+        self.ast_frontier = structures.Priority_Frontier()
+        self.explored = structures.Explored()
+        self.frontier = structures.Frontier()
         self.path = self.a_star_algorithm()
 
     def solvable(self, input_list):

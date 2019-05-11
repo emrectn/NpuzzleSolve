@@ -60,7 +60,7 @@ class Grid:
         self.state[space[0]][space[1]] = tile_to_move
         self.state[space[0] + y][space[1] + x] = 0
 
-        return True
+        return True, (space[0], space[1], tile_to_move), (space[0]+y, space[1]+x, "")
 
     def visualize(self):
         print("\n", "-"*((self.n*2)**2//2))
@@ -68,4 +68,3 @@ class Grid:
             for x, value in enumerate(row):
                 print(" {:3d} |".format(value), end="")
             print("\n", "-"*((self.n*2)**2//2))
-
